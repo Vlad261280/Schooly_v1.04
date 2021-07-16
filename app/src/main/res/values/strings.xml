@@ -110,4 +110,14 @@
     <string name="tests">Тесты</string>
     <string name="popular">Популярные</string>
 
+
+    <string name="searchtests">Поиск тестов</string>
+    <string name="mytests">МОИ ТЕСТЫ</string>
+    <string name="schoolytests">Тесты Schooly</string>
+
+
+    <string name="num">318</string>
+    <string name="newnew">Новое</string>
+    <string name="searchitem">Поиск одежды</string>
+
 </resources>
