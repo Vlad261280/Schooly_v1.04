@@ -32,7 +32,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity implements RegisrtationstartFragment.sendAuthData {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,21 +153,6 @@ public class MainActivity extends AppCompatActivity implements Regisrtationstart
         return false;
     }
 
-    @Override
-    public void sendData(GoogleSignInOptions gso, GoogleSignInClient signInClient, FirebaseAuth authBase, String type) {
-       switch (type){
-           case "EnterFragment":
-               setCurrentFragment(EnterFragment.newInstance());
-               Log.d("####### ", String.valueOf((getSupportFragmentManager().findFragmentById(R.id.frame).getClass())));
-              // EnterFragment fr = (EnterFragment)getSupportFragmentManager().findFragmentById(R.id.frame);
-              // fr.getData(gso, signInClient, authBase);
-               break;
-           case "RegistrationFragment":
-               RegFragment frr = (RegFragment)getSupportFragmentManager().findFragmentById(R.id.frame);
-               frr.getData(gso, signInClient, authBase);
-               break;
-       }
-    }
 
 
 

@@ -45,7 +45,10 @@ public class EnterFragment extends Fragment {
     GoogleSignInOptions gso;
     GoogleSignInClient signInClient;
     RelativeLayout GoogleEnter;
+    FirebaseAuth AuthenticationBase;
     int RC_SIGN_IN = 175;
+    int GOOGLE_SIGN_IN = 101;
+    private static final String TAG = "###########";
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -54,54 +57,69 @@ public class EnterFragment extends Fragment {
         bnv.setVisibility(bnv.GONE);
         AppBarLayout abl = getActivity().findViewById(R.id.AppBarLayout);
         abl.setVisibility(abl.GONE);
+        GoogleEnter = root.findViewById(R.id.GoogleEnter);
 
-        //////Testing////
+        ////////////////Init network references
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
-
         signInClient = GoogleSignIn.getClient(getActivity(), gso);
-        AuthBase = FirebaseAuth.getInstance();
-        ////////////////
-
-        phoneEditText = root.findViewById(R.id.egitnick);
-        passwordEditText = root.findViewById(R.id.editpassworgenter);
-        GoogleEnter = root.findViewById(R.id.GoogleEnter);
+        AuthenticationBase = FirebaseAuth.getInstance();
+        ///////////////Authorization throw google
         GoogleEnter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                signInGoogle();
+                AuthorizationThrowGoogle();
             }
         });
 
         return root;
     }
-    private void signInGoogle() {
+
+    public void setCurrentFragment(Fragment fragment) {
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.frame, fragment);
+        ft.commit();
+    }
+    public void AuthorizationThrowGoogle(){
         Intent signInIntent = signInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+        startActivityForResult(signInIntent, GOOGLE_SIGN_IN);
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == GOOGLE_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                Log.d("#####", "firebaseAuthWithGoogle:" + account.getId());
-                EnterThrowGoogle(account.getIdToken(), AuthBase, getActivity(), getActivity().getSupportFragmentManager());
+                Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
+                firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
-                Log.w("#####", "Google sign in failed", e);
+                Log.w(TAG, "Google sign in failed", e);
             }
         }
     }
-    public void getData(GoogleSignInOptions gso, GoogleSignInClient signInClient, FirebaseAuth authBase){
-        this.gso = gso;
-        this.signInClient = signInClient;
-        this.AuthBase = authBase;
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        AuthenticationBase.signInWithCredential(credential)
+                .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithCredential:success");
+                            FirebaseUser user = AuthenticationBase.getCurrentUser();
+                            setCurrentFragment(MainFragment.newInstance());
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                        }
+                    }
+                });
     }
 }
